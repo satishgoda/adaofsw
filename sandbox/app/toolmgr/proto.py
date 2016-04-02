@@ -66,6 +66,15 @@ createSphere.execute(('sphere2', 3))
 
 createCylinder.execute(('cylinder20', 3, 6))
 
+# Using the ToolManager in an user interface 
+
+tlw = TreeListWindow()
+
+tlw.show()
+
+for toolName in ToolManager.tools:
+    tool = ToolManager.tools[toolName]['instance']
+    tlw.treeLister.addItem = (toolName, '', tool.invoke)
 
 """
 OrderedDict([('Create Sphere', {'instance': <__main__.Tool object at 0x00000007E9128E80>, 'history': []}), ('Create Cylinder', {'instance': <__main__.Tool object at 0x00000007E9128F98>, 'history': []})])
