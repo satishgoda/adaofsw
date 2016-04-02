@@ -55,6 +55,8 @@ tool1.invoke()
 
 tool2.invoke()
 
+tool1.execute(('sphere2', 3))
+
 """
 OrderedDict([('Create Sphere', <__main__.Tool object at 0x00000007B07A3EB8>), ('Create Cylinder', <__main__.Tool object at 0x00000007B07A3E80>)])
 
@@ -72,4 +74,8 @@ Create Cylinder with
 	 'name, -> cyl1'
 	 'radius, -> 2'
 	 'height -> 4'
+
+Create Sphere with
+	 'name, -> sphere2'
+	 'radius -> 3'
 """
