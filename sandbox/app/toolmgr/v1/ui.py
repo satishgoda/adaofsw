@@ -7,6 +7,7 @@ class ToolManagerWindow(object):
         self.mgr = toolmgr
         self.window = TreeListWindow()
         self.propsWindow = None
+        self.propsUI = []
         self.propValues = {}
         self.initializeTools()
     
@@ -20,17 +21,8 @@ class ToolManagerWindow(object):
     def addToolWidget(self, tool):
         self.window.treeLister.addItem = (tool.name, '', partial(self.invokeTool, tool))
 
-    def invokeTool(self, tool):
-        try:
-            if not self.propsWindow is None:
-                cmds.deleteUI(self.propsWindow)
-        except RuntimeError as e:
-            cmds.warning(e)
-        
+    def invokeTool(self, tool):        
         self.invokePropsWindow(tool)
-    
-    def propEdited(self, propName, value):
-        self.propValues[propName] = value
     
     def invokePropsWindow(self, tool):
         self.propsWindow = cmds.window(title=tool.name)
@@ -38,23 +30,23 @@ class ToolManagerWindow(object):
 
         for prop in tool.properties:
             cmds.text(label=prop.capitalize())
-            cmds.textField(changeCommand=partial(self.propEdited, prop))
+            tf = cmds.textField()
+            self.propsUI.append(tf)
         self.execButton = cmds.button(label='execute', command=partial(self.executeTool, tool))
         
         cmds.showWindow(self.propsWindow)
     
     def executeTool(self, tool, incoming):
         values = []
-        
-        for propName in tool.properties:
-            values.append(self.propValues[propName])
+
+        for propUI in self.propsUI:
+            values.append(cmds.textField(propUI, query=True, text=True))
         
         tool.execute(values)
-        
         cmds.deleteUI(self.propsWindow)
         
         self.propsWindow = None
-        self.propValues = {}
+        self.propsUI = []
 
 def testUI():
     createSphere = Tool("Create Sphere", "name radius")
