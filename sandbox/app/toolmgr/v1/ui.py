@@ -36,17 +36,21 @@ class ToolManagerWindow(object):
         
         cmds.showWindow(self.propsWindow)
     
+    def cleanupPropsWindow(self):
+        cmds.deleteUI(self.propsWindow)
+        
+        self.propsWindow = None
+        self.propsUI = []
+    
     def executeTool(self, tool, incoming):
         values = []
 
         for propUI in self.propsUI:
             values.append(cmds.textField(propUI, query=True, text=True))
         
-        tool.execute(values)
-        cmds.deleteUI(self.propsWindow)
+        self.mgr.executeTool(tool, values)
         
-        self.propsWindow = None
-        self.propsUI = []
+        self.cleanupPropsWindow()
 
 def testUI():
     createSphere = Tool("Create Sphere", "name radius")
