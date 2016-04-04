@@ -5,41 +5,45 @@ from toolmgr import ToolManager
 class ToolManagerWindow(object):
     def __init__(self, toolmgr):
         self.mgr = toolmgr
-        self.window = TreeListWindow()
-        self.propsWindow = None
+        self.window = cmds.window()
+        self.pl = cmds.paneLayout( configuration='horizontal2')
+        self.tl = cmds.treeLister()
+        self.propsLayout = None
         self.propsUI = []
         self.propValues = {}
         self.initializeTools()
     
     def show(self):
-        self.window.show()
+        cmds.showWindow(self.window)
     
     def initializeTools(self):
         for toolName in self.mgr.tools:
             self.addToolWidget(self.mgr.tools[toolName]['instance'])
     
     def addToolWidget(self, tool):
-        self.window.treeLister.addItem = (tool.name, '', partial(self.invokeTool, tool))
+        cmds.treeLister(self.tl, edit=True, addItem = (tool.name, '', partial(self.invokeTool, tool)))
 
     def invokeTool(self, tool):        
         self.invokePropsWindow(tool)
     
     def invokePropsWindow(self, tool):
-        self.propsWindow = cmds.window(title=tool.name)
-        cmds.rowColumnLayout( numberOfColumns=2, columnAttach=(1, 'right', 0), columnWidth=[(1, 100), (2, 250)] )
+        if not self.propsLayout is None:
+            self.cleanupPropsWindow()
+        
+        self.createPropsWindow(tool)
+        
+    def createPropsWindow(self, tool):
+        self.propsLayout = cmds.rowColumnLayout(parent=self.pl, numberOfColumns=2, columnAttach=(1, 'right', 0), columnWidth=[(1, 100), (2, 250)] )
 
         for prop in tool.properties:
             cmds.text(label=prop.capitalize())
             tf = cmds.textField()
             self.propsUI.append(tf)
         self.execButton = cmds.button(label='execute', command=partial(self.executeTool, tool))
-        
-        cmds.showWindow(self.propsWindow)
     
     def cleanupPropsWindow(self):
-        cmds.deleteUI(self.propsWindow)
-        
-        self.propsWindow = None
+        cmds.deleteUI(self.propsLayout)
+        self.propsLayout = None
         self.propsUI = []
     
     def executeTool(self, tool, incoming):
