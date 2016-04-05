@@ -2,69 +2,75 @@ import maya.cmds as cmds
 
 from toolmgr import ToolManager
 
-class ToolManagerWindow(object):
-    def __init__(self, toolmgr):
-        self.mgr = toolmgr
-        self.window = cmds.window()
-        self.pl = cmds.paneLayout( configuration='horizontal2')
-        self.tl = cmds.treeLister()
+class ToolPropertiesWindow(object):
+    def __init__(self, parent):
+        self.parent = parent
         self.propsLayout = None
         self.propsUI = []
         self.propValues = {}
-        self.initializeTools()
     
-    def show(self):
-        cmds.showWindow(self.window)
-    
-    def initializeTools(self):
-        for toolName in self.mgr.tools:
-            self.addToolWidget(self.mgr.tools[toolName]['instance'])
-    
-    def addToolWidget(self, tool):
-        cmds.treeLister(self.tl, edit=True, addItem = (tool.name, '', partial(self.invokeTool, tool)))
-
-    def invokeTool(self, tool):        
-        self.invokePropsWindow(tool)
-    
-    def invokePropsWindow(self, tool):
+    def initialize(self, tool, executionCallback):
         if not self.propsLayout is None:
-            self.cleanupPropsWindow()
+            self.cleanup()
         
-        self.createPropsWindow(tool)
-        
-    def createPropsWindow(self, tool):
-        self.propsLayout = cmds.rowColumnLayout(parent=self.pl, numberOfColumns=2, columnAttach=(1, 'right', 0), columnWidth=[(1, 100), (2, 250)] )
+        self.propsLayout = cmds.rowColumnLayout(parent=self.parent, numberOfColumns=2, columnAttach=(1, 'right', 0), columnWidth=[(1, 100), (2, 250)] )
 
         for prop in tool.properties:
             cmds.text(label=prop.capitalize())
             tf = cmds.textField()
             self.propsUI.append(tf)
-        self.execButton = cmds.button(label='execute', command=partial(self.executeTool, tool))
+        
+        self.execButton = cmds.button(label='execute', command=partial(executionCallback, tool))
+
+    def values(self):
+        values = []
+        for propUI in self.propsUI:
+            value = cmds.textField(propUI, query=True, text=True)
+            values.append(value)
+        return values
     
-    def cleanupPropsWindow(self):
+    def cleanup(self):
         cmds.deleteUI(self.propsLayout)
         self.propsLayout = None
         self.propsUI = []
     
-    def executeTool(self, tool, incoming):
-        values = []
+class ToolBoxWindow(object):
+    def __init__(self, toolmgr):
+        self.mgr = toolmgr
+        self.window = cmds.window()
+        self.pl = cmds.paneLayout( configuration='horizontal2')
+        self.tl = cmds.treeLister()
+        self.toolPropsWindow = ToolPropertiesWindow(self.pl)
+    
+    def show(self):
+        cmds.dockControl(content=self.window, area='left', allowedArea=('left', 'right'))
+    
+    def initializeTools(self):
+        for toolName in self.mgr.tools:
+            tool = self.mgr.tools[toolName]['instance']
+            cmds.treeLister(self.tl, edit=True, addItem = (tool.name, '', partial(self.invokeTool, tool)))
 
-        for propUI in self.propsUI:
-            values.append(cmds.textField(propUI, query=True, text=True))
+    def invokeTool(self, tool):        
+        self.invokePropsWindow(tool)
+    
+    def invokePropsWindow(self, tool):
+        self.toolPropsWindow.initialize(tool, self.executeTool)
+        
+    def executeTool(self, tool, incoming):
+        values = self.toolPropsWindow.values()
         
         self.mgr.executeTool(tool, values)
         
-        self.cleanupPropsWindow()
+        self.toolPropsWindow.cleanup()
 
-def testUI():
-    createSphere = Tool("Create Sphere", "name radius")
-    createCylinder = Tool("Create Cylinder", "name radius height")
-    
-    ToolManager.addTool(createSphere)
-    ToolManager.addTool(createCylinder)
-    
-    tmw = ToolManagerWindow(ToolManager)
-    
-    tmw.show()
+createSphere = Tool("Create/Sphere", "name radius")
+createCylinder = Tool("Create/Cylinder", "name radius height")
 
-testUI()
+ToolManager.addTool(createSphere)
+ToolManager.addTool(createCylinder)
+
+tbw = ToolBoxWindow(ToolManager)
+
+tbw.show()
+
+tbw.initializeTools()
