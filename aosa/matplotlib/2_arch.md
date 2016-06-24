@@ -11,13 +11,16 @@ One Figure, Multiple Backends/Output Devices
 
 Implements the abstract interfaces of 
 
-* FigureCanvas - Encapsulates the concept of a surface to draw into (Paper)
-  * QtFigureCanvas knows how to insert itself into a native Qt window
+* FigureCanvas - Paper
+  * Encapsulates the concept of a surface to draw into
+  * QtFigureCanvas knows how to insert itself into a native Qt window (QtGui.QPaintDevice)
 
-* Renderer - Does the rendering (Paintbrush)
+* Renderer - Paintbrush
+  * Does the rendering
   * Transfer the matplotlib Renderer commands onto the canvas (QtGui.QPainter)
 
-* Event - Handles user inputs such as keyboard and mouse events
+* Event - QEvent
+  * Handles user inputs such as keyboard and mouse events
   * Translate native Qt events into the matplotlib Event framework
   * This signals the event dispatcher to generate events so upstream listeners can handle them
 
