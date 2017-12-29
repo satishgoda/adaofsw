@@ -45,7 +45,10 @@ class DeckReview(object):
         next_index = self.current_index%self.number_of_cards
         return self.deck.cards[next_index]
 
-    
+    @property
+    def current_card(self):
+        return self.deck.cards[self.current_index]
+
     @property
     def next_card(self):
         return self._card_adjoining(1)
@@ -71,7 +74,7 @@ if __name__ == '__main__':
     
     review = DeckReview(deck)
 
-    print(review.deck.cards[review.current_index])
+    print(review.current_card)
     for index in range(10):
         print(review.next_card)
         
@@ -80,6 +83,6 @@ if __name__ == '__main__':
     
     review = DeckReview(deck)
 
-    print(review.deck.cards[review.current_index])
+    print(review.current_card)
     for index in range(10):
         print(review.previous_card)
