@@ -28,6 +28,16 @@ class DeckReview(object):
         next_index = self.current_index%self.number_of_cards
         return self.deck.cards[next_index]
 
+    def deliver_next_card(self, receiver_callback):
+        def _deliver_next():
+            receiver_callback(self.next_card)
+        return _deliver_next
+
+    def deliver_prev_card(self, receiver_callback):
+        def _deliver_prev():
+            receiver_callback(self.previous_card)
+        return _deliver_prev
+
     @property
     def current_card(self):
         return self.deck.cards[self.current_index]

@@ -43,19 +43,14 @@ class DeckReviewWidget(QtGui.QWidget):
         self._buttonsLayout.addWidget(self._nextButton)
 
     def _setupSignals(self):
-        self._prevButton.clicked.connect(self._prev_card)
-        self._nextButton.clicked.connect(self._next_card)
+        callback = self.review_model.deliver_next_card(self.update_cardView)
+        self._prevButton.clicked.connect(callback)
+        
+        callback = self.review_model.deliver_prev_card(self.update_cardView)
+        self._nextButton.clicked.connect(callback)
 
     def update_cardView(self, card):
         self._cardView.setText(card.front)
-
-    def _prev_card(self):
-        card = self.review_model.previous_card
-        self.update_cardView(card)
-
-    def _next_card(self):
-        card = self.review_model.next_card
-        self.update_cardView(card)
 
     def _initialize(self):
         card = self.review_model.current_card
