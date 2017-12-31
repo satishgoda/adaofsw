@@ -63,13 +63,11 @@ class DeckReviewWidget(QtGui.QWidget):
 
 
 if __name__ == '__main__':
-    from flashcardapp.deck import Deck, DeckReview
-    from flashcardapp.card import Card
+    from flashcardapp import Deck, DeckReview, fetch_demo_cards
 
     deck = Deck("Test1")
 
-    for front, back in [('a', 'A'), ('and', 'AND'), ('can', 'CAN'), ('down','DOWN'), ('egg','EGG'), ('up','UP'), ('here','HERE'),]:
-        card = Card(front, back)
+    for card in fetch_demo_cards():
         deck.add_card(card)
 
     review_model = DeckReview(deck)
